@@ -1,46 +1,12 @@
 import pytest
 
-from app.expression_builder import check_parentheses, check_type
+from app.expression_builder import expression_builder
 
 
 @pytest.mark.parametrize(
-    "expression, expected",
-    [
-        ("sin(x", False),
-        ("x+1)", False),
-        ("(x+1)^2", True),
-        ("sin(x)*2)", False),
-        ("(x+3)*(x+4)", True),
-        ("sin(3*(x+1))", True),
-        ("(sin(x)+cos(x))^2", True),
-        ("(()())(", False),
-        ("(()()))", False),
-        ("(()())()", True),
-    ],
+    "expression, expected_result",
+    [("(2*3+4)*5", 50), ("(2+3)*(4+5)", 45), ("2+(3*4)+5", 19)],
 )
-def test_check_parentheses(expression, expected):
-    assert check_parentheses(expression) == expected
-
-
-@pytest.mark.parametrize(
-    "expression, expected",
-    [
-        ("sin(x)", "function"),
-        ("cos(x+1)", "function"),
-        ("tan(3*(x+1))", "function"),
-        ("exp((x+1)*(x+3))", "function"),
-        ("log(x-1)", "function"),
-        ("x+3", "expression"),
-        ("sin(x)^2+cos(x)^2", "expression"),
-        ("sin(x)^cos(x)", "expression"),
-        ("x+sin(x)", "expression"),
-        ("sin(x)*x^2", "expression"),
-        ("x", "variable"),
-        ("0", "constant"),
-        ("1", "constant"),
-        ("3.14", "constant"),
-        ("314", "constant"),
-    ],
-)
-def test_check_type(expression, expected):
-    assert check_type(expression) == expected
+def test_expression_builder(expression, expected_result):
+    expr = expression_builder(expression)
+    assert expr.evaluate() == expected_result

@@ -1,14 +1,11 @@
 # Tasks
 
 - evaluate.py
-- expression.py: type of expression -> value (3.14, x, -17 ...), function (sin(x), exp(x+1), expression (x+1, 10^2, -3%x)
+- expression.py -- Expression representation: AlgebraicExpression, Constant, Operation
+- expression_builder.py -- string -> expression tree: using regular expression statemachines
 
-x+y
+# Expression representation
 
-x+(y+z)
-(x+y)+z
-(x+y)+(v+w)
-((()())
+AlgebraicExpression(lhs, rhs, operation, function)
 
-- open and close must be equal
-- must start with open
+Example: sin(3*x) -> AlgebraicExpression(Constant(3), Variable(x), Operation("*"), Function("sin"))
