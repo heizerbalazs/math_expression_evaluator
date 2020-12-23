@@ -1,46 +1,91 @@
 import pytest
 
-from app.expression import check_parentheses, check_type
+from operator import add, sub, mul, truediv, mod, pow, gt, eq, lt
+from math import sin, cos, tan, log, exp
+from itertools import product
+
+from app.expression import AlgebraicExpression, Constant, Operation
 
 
 @pytest.mark.parametrize(
-    "expression, expected",
+    "expression, result",
     [
-        ("sin(x", False),
-        ("x+1)", False),
-        ("(x+1)^2", True),
-        ("sin(x)*2)", False),
-        ("(x+3)*(x+4)", True),
-        ("sin(3*(x+1))", True),
-        ("(sin(x)+cos(x))^2", True),
-        ("(()())(", False),
-        ("(()()))", False),
-        ("(()())()", True),
+        (AlgebraicExpression(Constant(3), Constant(2), Operation("+")), 5),
+        (AlgebraicExpression(Constant(3), Constant(2), Operation("-")), 1),
+        (AlgebraicExpression(Constant(3), Constant(2), Operation("*")), 6),
+        (
+            AlgebraicExpression(Constant(3), Constant(2), Operation("/")),
+            1.5,
+        ),
+        (AlgebraicExpression(Constant(3), Constant(2), Operation("%")), 1),
+        (AlgebraicExpression(Constant(3), Constant(2), Operation("^")), 9),
+        # (2+3)*(4+5)
+        (
+            AlgebraicExpression(
+                AlgebraicExpression(Constant(2), Constant(3), Operation("+")),
+                AlgebraicExpression(Constant(4), Constant(5), Operation("+")),
+                Operation("*"),
+            ),
+            45,
+        ),
+        # 2+(3*4)+5
+        (
+            AlgebraicExpression(
+                Constant(2),
+                AlgebraicExpression(
+                    AlgebraicExpression(Constant(3), Constant(4), Operation("*")),
+                    Constant(5),
+                    Operation("+"),
+                ),
+                Operation("+"),
+            ),
+            19,
+        ),
     ],
 )
-def test_check_parentheses(expression, expected):
-    assert check_parentheses(expression) == expected
+def test_algebraic_expression(expression, result):
+    assert expression.evaluate() == result
+
+
+@pytest.mark.parametrize("value", [0, 1, 3.1415, -4, -0.5, 12321432, -2131413411])
+def test_constant(value):
+    c = Constant(value)
+    assert c.evaluate() == value
 
 
 @pytest.mark.parametrize(
-    "expression, expected",
+    "symbol, expected_priority, expected_operator",
     [
-        ("sin(x)", "function"),
-        ("cos(x+1)", "function"),
-        ("tan(3*(x+1))", "function"),
-        ("exp((x+1)*(x+3))", "function"),
-        ("log(x-1)", "function"),
-        ("x+3", "expression"),
-        ("sin(x)^2+cos(x)^2", "expression"),
-        ("sin(x)^cos(x)", "expression"),
-        ("x+sin(x)", "expression"),
-        ("sin(x)*x^2", "expression"),
-        ("x", "variable"),
-        ("0", "constant"),
-        ("1", "constant"),
-        ("3.14", "constant"),
-        ("314", "constant"),
+        ("+", 0, add),
+        ("-", 0, sub),
+        ("*", 1, mul),
+        ("/", 1, truediv),
+        ("%", 1, mod),
+        ("^", 2, pow),
     ],
 )
-def test_check_type(expression, expected):
-    assert check_type(expression) == expected
+def test_operation(symbol, expected_priority, expected_operator):
+    o = Operation(symbol)
+    assert o.priority == expected_priority
+    assert o.operator == expected_operator
+
+
+case_sets = [
+    (["+", "-"], ["+", "-"], [eq]),
+    (["*", "/", "%"], ["*", "/", "%"], [eq]),
+    (["^"], ["^"], [eq]),
+    (["+", "-"], ["*", "/", "%", "^"], [lt]),
+    (["*", "/", "%"], ["^"], [lt]),
+    (["^"], ["+", "-", "*", "/", "%"], [gt]),
+    (["*", "/", "%"], ["+", "-"], [gt]),
+]
+
+
+@pytest.mark.parametrize(
+    "symbol1, symbol2, comparison",
+    [case for case_set in case_sets for case in product(*case_set)],
+)
+def test_operation_order(symbol1, symbol2, comparison):
+    o1 = Operation(symbol1)
+    o2 = Operation(symbol2)
+    assert comparison(o1, o2)
