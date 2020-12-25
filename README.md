@@ -9,3 +9,5 @@
 AlgebraicExpression(lhs, rhs, operation, function)
 
 Example: sin(3*x) -> AlgebraicExpression(Constant(3), Variable(x), Operation("*"), Function("sin"))
+
+# Expression building

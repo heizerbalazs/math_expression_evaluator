@@ -19,7 +19,7 @@ from app.expression import AlgebraicExpression, Constant, Operation
         ),
         (AlgebraicExpression(Constant(3), Constant(2), Operation("%")), 1),
         (AlgebraicExpression(Constant(3), Constant(2), Operation("^")), 9),
-        # (2+3)*(4+5)
+        # (2+3)*(4+5) == 45
         (
             AlgebraicExpression(
                 AlgebraicExpression(Constant(2), Constant(3), Operation("+")),
@@ -28,7 +28,7 @@ from app.expression import AlgebraicExpression, Constant, Operation
             ),
             45,
         ),
-        # 2+(3*4)+5
+        # 2+(3*4)+5 == 19
         (
             AlgebraicExpression(
                 Constant(2),
