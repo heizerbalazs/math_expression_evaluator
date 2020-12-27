@@ -4,12 +4,11 @@ from abc import ABC, abstractmethod
 
 
 class Operation:
-    # TODO
     prioroties = {
-        "+": [0, add],  # add inverse, invert False
-        "-": [0, sub],  # add inverse, invert True
-        "*": [1, mul],  # add inverse, invert False
-        "/": [1, truediv],  # add inverse, invert True
+        "+": [0, add],
+        "-": [0, sub],
+        "*": [1, mul],
+        "/": [1, truediv],
         "%": [1, mod],
         "^": [2, pow],
     }

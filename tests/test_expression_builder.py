@@ -1,6 +1,7 @@
 import pytest
 
 from app.expression_builder import expression_tree_builder
+from app.expression import AlgebraicExpression
 
 
 @pytest.mark.parametrize(
@@ -9,12 +10,13 @@ from app.expression_builder import expression_tree_builder
         ("2+3", 5),
         ("2+3+4", 9),
         ("1+2+3+4+5+6+7+8+9", 45),
+        ("1-2+3+4+5+6+7+8+9", 41),
         ("1-2+3-4+5-6+7-8+9", 5),
         (
             "1+2^3*4-5+6/7",
             1 + 2 ** 3 * 4 - 5 + 6 / 7,
-        ),  # when we construct the tree we are adding new parentheses so we should change +/-/*// to -/+///*
-        ("2*3*4/5", 2 * (3 * (4 / 5))),  # 2 * 3 * 4 / 5 != 2 * (3 * (4 / 5))
+        ),
+        ("2*3*4/5", ((2 * 3) * 4) / 5),
         ("2/3*4/5", 2 / 3 * 4 / 5),
         ("2*3+4", 10),
         ("2^3+4", 12),
@@ -28,5 +30,5 @@ from app.expression_builder import expression_tree_builder
     ],
 )
 def test_expression_tree_builder(expression, expected_result):
-    i, expr = expression_tree_builder(expression)
+    _, expr = expression_tree_builder(expression, AlgebraicExpression(), 0)
     assert expr.evaluate() == expected_result
