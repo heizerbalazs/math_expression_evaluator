@@ -94,8 +94,8 @@ class Constant(Expression):
 
 
 class Variable(Expression):
-    def __init__(self, symbol):
-        self.symbol = symbol
+    def __init__(self, symbol, variables):
+        self.value = variables[symbol]
 
-    def evaluate(self, value):
-        return value
+    def evaluate(self):
+        return self.value

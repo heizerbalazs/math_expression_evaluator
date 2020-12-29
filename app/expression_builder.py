@@ -1,5 +1,5 @@
 from string import ascii_lowercase, digits
-from app.expression import AlgebraicExpression, Operation, Constant
+from app.expression import AlgebraicExpression, Operation, Constant, FunctionOperation
 
 
 def is_letter(c):
@@ -11,7 +11,11 @@ def is_digit(c):
 
 
 def is_operaton(c):
-    return c not in (digits + ascii_lowercase + "(" + ")")
+    return c in Operation.operations.keys()
+
+
+def is_variable(c):
+    return c == "x"
 
 
 def find_last_letter(expression, start):
@@ -22,6 +26,7 @@ def find_last_letter(expression, start):
             i += 1
         else:
             return start, i
+    return start, n
 
 
 def find_last_digit(expression, start):
@@ -60,12 +65,14 @@ def find_closing_parenthesis(expression, start):
             lvl -= 1
 
         if lvl == 0:
-            return start, i
+            return start, i + 1
         i += 1
 
 
 def expression_tree_builder(
-    expression: str, expression_tree: AlgebraicExpression, index: int
+    expression: str,
+    expression_tree: AlgebraicExpression = AlgebraicExpression(),
+    index: int = 0,
 ):
     n = len(expression)
     if index < n:
@@ -73,17 +80,35 @@ def expression_tree_builder(
         # handling parentheses
         if c == "(":
             start, end = find_closing_parenthesis(expression, index)
-            _, exp = expression_tree_builder(
+            _, sub_expression = expression_tree_builder(
                 expression[start:end], AlgebraicExpression(), 1
             )
-            index = end
+            index = end - 1
             if expression_tree.lhs is None:
-                expression_tree.lhs = exp
+                expression_tree.lhs = sub_expression
             else:
-                expression_tree.rhs = exp
+                expression_tree.rhs = sub_expression
+        elif c == ")":
+            if expression_tree.rhs is None:
+                expression_tree.rhs = Constant(0)
         # handling letters
         elif is_letter(c):
-            pass
+            if is_variable(c):
+                pass
+            else:
+                start, end = find_last_letter(expression, index)
+                sub_expression = AlgebraicExpression()
+                sub_expression.function = FunctionOperation(expression[start:end])
+                index = end
+                start, end = find_closing_parenthesis(expression, index)
+                index, sub_expression = expression_tree_builder(
+                    expression[start:end], sub_expression, 1
+                )
+                index = end - 1
+                if expression_tree.lhs is None:
+                    expression_tree.lhs = sub_expression
+                else:
+                    expression_tree.rhs = sub_expression
         # handling digits
         elif is_digit(c):
             start, end = find_last_digit(expression, index)
@@ -122,6 +147,5 @@ def expression_tree_builder(
         return expression_tree_builder(expression, expression_tree, index + 1)
     else:
         if expression_tree.rhs is None:
-            return index, expression_tree.lhs
-        else:
-            return index, expression_tree
+            expression_tree.rhs = Constant(0)
+        return index, expression_tree

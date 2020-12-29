@@ -1,5 +1,7 @@
 import pytest
 
+from math import sin, cos, tan, log, exp
+
 from app.expression_builder import expression_tree_builder
 from app.expression import AlgebraicExpression
 
@@ -40,7 +42,7 @@ def test_expression_tree_builder_for_integers(expression, expected_result):
 @pytest.mark.parametrize(
     "expression, expected_result",
     [
-        ("1*(2+3)", 5),
+        ("2*(2+3)", 10),
         ("(1+2)*3", 9),
         ("2^(3+4*(2+1))", 32768),
         ("2^(3+4*(2+1))+1", 32769),
@@ -49,6 +51,7 @@ def test_expression_tree_builder_for_integers(expression, expected_result):
             "2^(3+4*(2+1)^(2*(1+2)-5))*5",
             32768 * 5,
         ),
+        ("((3+2)*4)^((3-2)*3)", ((3 + 2) * 4) ** ((3 - 2) * 3)),
         ("(3+4*(2+1))*4", 60),
         ("4^(3^(2^(1)))", 262144),
         ("4^3^2^1", 262144),
@@ -72,8 +75,33 @@ def test_expression_tree_builder_with_parenthases(expression, expected_result):
             "2^(3/0.4*(2+1)^(2*(1+2)-5))*5",
             2 ** (3 / 0.4 * (2 + 1) ** (2 * (1 + 2) - 5)) * 5,
         ),
+        ("3.14^2+6.25^3", 3.14 ** 2 + 6.25 ** 3),
+        ("(3.14-10)^2+6.25^3", (3.14 - 10) ** 2 + 6.25 ** 3),
     ],
 )
 def test_expression_tree_builder_for_floats(expression, expected_result):
+    _, expr = expression_tree_builder(expression, AlgebraicExpression(), 0)
+    assert expr.evaluate() == float(expected_result)
+
+
+@pytest.mark.parametrize(
+    "expression, expected_result",
+    [
+        ("sin(3.14)", sin(3.14)),
+        ("cos(3.14)", cos(3.14)),
+        ("tan(3.14)", tan(3.14)),
+        ("exp(3.14)", exp(3.14)),
+        ("log(3.14)", log(3.14)),
+        ("sin(3.14+1)", sin(3.14 + 1)),
+        ("sin(3.14)^2", sin(3.14) ** 2),
+        ("sin(3.14)^2+cos(3.14)^2", sin(3.14) ** 2 + cos(3.14) ** 2),
+        ("sin(3.14)*2+cos(3.14)*2", sin(3.14) * 2 + cos(3.14) * 2),
+        ("2*sin(3.14+1)+2*cos(3.14+1)", 2 * sin(3.14 + 1) + 2 * cos(3.14 + 1)),
+        ("sin(3.14+cos(3.14))", sin(3.14 + cos(3.14))),
+        ("log(exp(3.14)+100)", log(exp(3.14) + 100)),
+        ("log((3.14+1.3543)*100)", log((3.14 + 1.3543) * 100)),
+    ],
+)
+def test_expression_tree_builder_with_functions(expression, expected_result):
     _, expr = expression_tree_builder(expression, AlgebraicExpression(), 0)
     assert expr.evaluate() == float(expected_result)
