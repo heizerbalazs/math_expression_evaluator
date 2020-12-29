@@ -34,7 +34,7 @@ from app.expression import AlgebraicExpression
 )
 def test_expression_tree_builder_for_integers(expression, expected_result):
     _, expr = expression_tree_builder(expression, AlgebraicExpression(), 0)
-    assert expr.evaluate() == expected_result
+    assert expr.evaluate() == float(expected_result)
 
 
 @pytest.mark.parametrize(
@@ -50,8 +50,30 @@ def test_expression_tree_builder_for_integers(expression, expected_result):
             32768 * 5,
         ),
         ("(3+4*(2+1))*4", 60),
+        ("4^(3^(2^(1)))", 262144),
+        ("4^3^2^1", 262144),
+        ("(((5^4)^3)^2)^1", 59604644775390625),
     ],
 )
 def test_expression_tree_builder_with_parenthases(expression, expected_result):
     _, expr = expression_tree_builder(expression, AlgebraicExpression(), 0)
-    assert expr.evaluate() == expected_result
+    assert expr.evaluate() == float(expected_result)
+
+
+@pytest.mark.parametrize(
+    "expression, expected_result",
+    [
+        ("1.5*(203+3.14)", 1.5 * (203 + 3.14)),
+        ("(13+0.2)*0.0003", (13 + 0.2) * 0.0003),
+        ("0.2^(30+4.15*(-0.22+1))", 0.2 ** (30 + 4.15 * (-0.22 + 1))),
+        ("23^(3+4*(2+1))+1", 23 ** (3 + 4 * (2 + 1)) + 1),
+        ("2^(3+4/(-2+0.1))*5", 2 ** (3 + 4 / (-2 + 0.1)) * 5),
+        (
+            "2^(3/0.4*(2+1)^(2*(1+2)-5))*5",
+            2 ** (3 / 0.4 * (2 + 1) ** (2 * (1 + 2) - 5)) * 5,
+        ),
+    ],
+)
+def test_expression_tree_builder_for_floats(expression, expected_result):
+    _, expr = expression_tree_builder(expression, AlgebraicExpression(), 0)
+    assert expr.evaluate() == float(expected_result)
