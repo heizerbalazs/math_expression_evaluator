@@ -35,7 +35,7 @@ from app.expression import AlgebraicExpression
     ],
 )
 def test_expression_tree_builder_for_integers(expression, expected_result):
-    _, expr = expression_tree_builder(expression, AlgebraicExpression(), 0)
+    _, expr = expression_tree_builder(expression, {}, AlgebraicExpression(), 0)
     assert expr.evaluate() == float(expected_result)
 
 
@@ -59,7 +59,7 @@ def test_expression_tree_builder_for_integers(expression, expected_result):
     ],
 )
 def test_expression_tree_builder_with_parenthases(expression, expected_result):
-    _, expr = expression_tree_builder(expression, AlgebraicExpression(), 0)
+    _, expr = expression_tree_builder(expression, {}, AlgebraicExpression(), 0)
     assert expr.evaluate() == float(expected_result)
 
 
@@ -80,7 +80,7 @@ def test_expression_tree_builder_with_parenthases(expression, expected_result):
     ],
 )
 def test_expression_tree_builder_for_floats(expression, expected_result):
-    _, expr = expression_tree_builder(expression, AlgebraicExpression(), 0)
+    _, expr = expression_tree_builder(expression, {}, AlgebraicExpression(), 0)
     assert expr.evaluate() == float(expected_result)
 
 
@@ -103,5 +103,20 @@ def test_expression_tree_builder_for_floats(expression, expected_result):
     ],
 )
 def test_expression_tree_builder_with_functions(expression, expected_result):
-    _, expr = expression_tree_builder(expression, AlgebraicExpression(), 0)
+    _, expr = expression_tree_builder(expression, {}, AlgebraicExpression(), 0)
+    assert expr.evaluate() == float(expected_result)
+
+
+@pytest.mark.parametrize(
+    "expression, variables, expected_result",
+    [
+        ("x", {"x": 3.14}, 3.14),
+        ("x^2", {"x": 3.14}, 3.14 ** 2),
+        ("sin(x^2)", {"x": 3.14}, sin(3.14 ** 2)),
+        ("sin(x)^2+cos(x)^2", {"x": 3.14}, sin(3.14) ** 2 + cos(3.14) ** 2),
+        ("sin(x)^2+cos(y)^2", {"x": 3.14, "y": 2.71}, sin(3.14) ** 2 + cos(2.71) ** 2),
+    ],
+)
+def test_expression_tree_builder_with_variables(expression, variables, expected_result):
+    _, expr = expression_tree_builder(expression, variables, AlgebraicExpression(), 0)
     assert expr.evaluate() == float(expected_result)

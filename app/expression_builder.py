@@ -1,5 +1,13 @@
 from string import ascii_lowercase, digits
-from app.expression import AlgebraicExpression, Operation, Constant, FunctionOperation
+from typing import Dict
+
+from app.expression import (
+    AlgebraicExpression,
+    Operation,
+    Constant,
+    FunctionOperation,
+    Variable,
+)
 
 
 def is_letter(c):
@@ -14,8 +22,8 @@ def is_operaton(c):
     return c in Operation.operations.keys()
 
 
-def is_variable(c):
-    return c == "x"
+def is_variable(c, variables):
+    return c in variables.keys()
 
 
 def find_last_letter(expression, start):
@@ -71,6 +79,7 @@ def find_closing_parenthesis(expression, start):
 
 def expression_tree_builder(
     expression: str,
+    variables: Dict,
     expression_tree: AlgebraicExpression = AlgebraicExpression(),
     index: int = 0,
 ):
@@ -81,7 +90,7 @@ def expression_tree_builder(
         if c == "(":
             start, end = find_closing_parenthesis(expression, index)
             _, sub_expression = expression_tree_builder(
-                expression[start:end], AlgebraicExpression(), 1
+                expression[start:end], variables, AlgebraicExpression(), 1
             )
             index = end - 1
             if expression_tree.lhs is None:
@@ -93,16 +102,20 @@ def expression_tree_builder(
                 expression_tree.rhs = Constant(0)
         # handling letters
         elif is_letter(c):
-            if is_variable(c):
-                pass
+            if is_variable(c, variables):
+                variable = Variable(c, variables)
+                if expression_tree.lhs is None:
+                    expression_tree.lhs = variable
+                else:
+                    expression_tree.rhs = variable
             else:
                 start, end = find_last_letter(expression, index)
                 sub_expression = AlgebraicExpression()
                 sub_expression.function = FunctionOperation(expression[start:end])
                 index = end
                 start, end = find_closing_parenthesis(expression, index)
-                index, sub_expression = expression_tree_builder(
-                    expression[start:end], sub_expression, 1
+                _, sub_expression = expression_tree_builder(
+                    expression[start:end], variables, sub_expression, 1
                 )
                 index = end - 1
                 if expression_tree.lhs is None:
@@ -132,7 +145,7 @@ def expression_tree_builder(
                 sub_expression = AlgebraicExpression()
                 sub_expression.lhs = expression_tree.rhs
                 index, expression_tree.rhs = expression_tree_builder(
-                    expression, sub_expression, index
+                    expression, variables, sub_expression, index
                 )
             else:
                 expression_tree.lhs = AlgebraicExpression(
@@ -144,7 +157,9 @@ def expression_tree_builder(
                 expression_tree.rhs = None
                 expression_tree.operation = new_operation
 
-        return expression_tree_builder(expression, expression_tree, index + 1)
+        return expression_tree_builder(
+            expression, variables, expression_tree, index + 1
+        )
     else:
         if expression_tree.rhs is None:
             expression_tree.rhs = Constant(0)
