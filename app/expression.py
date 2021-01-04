@@ -47,6 +47,7 @@ class FunctionOperation:
         "sin": sin,
         "cos": cos,
         "tan": tan,
+        "cot": lambda x: 1 / tan(x),
         "log": log,
         "exp": exp,
     }

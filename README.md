@@ -16,4 +16,4 @@ Example: sin(3*x) -> AlgebraicExpression(Constant(3), Variable(x), Operation("*"
 2. expression_builder for integers with () but without functions (done)
 3. expression_builder for integers with () and functions (done)
 4. expression_builder for floats with () and functions (done)
-5. add variables
+5. add variables (done)

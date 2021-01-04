@@ -2,7 +2,7 @@ import pytest
 
 from math import sin, cos, tan, log, exp
 
-from app.expression_builder import expression_tree_builder
+from app.expression_builder import ExpressionTreeBuilder
 from app.expression import AlgebraicExpression
 
 
@@ -35,7 +35,9 @@ from app.expression import AlgebraicExpression
     ],
 )
 def test_expression_tree_builder_for_integers(expression, expected_result):
-    _, expr = expression_tree_builder(expression, {}, AlgebraicExpression(), 0)
+    _, expr = ExpressionTreeBuilder(expression, {}).parse_expression(
+        AlgebraicExpression(), 0, 0
+    )
     assert expr.evaluate() == float(expected_result)
 
 
@@ -59,7 +61,9 @@ def test_expression_tree_builder_for_integers(expression, expected_result):
     ],
 )
 def test_expression_tree_builder_with_parenthases(expression, expected_result):
-    _, expr = expression_tree_builder(expression, {}, AlgebraicExpression(), 0)
+    _, expr = ExpressionTreeBuilder(expression, {}).parse_expression(
+        AlgebraicExpression(), 0, 0
+    )
     assert expr.evaluate() == float(expected_result)
 
 
@@ -80,7 +84,9 @@ def test_expression_tree_builder_with_parenthases(expression, expected_result):
     ],
 )
 def test_expression_tree_builder_for_floats(expression, expected_result):
-    _, expr = expression_tree_builder(expression, {}, AlgebraicExpression(), 0)
+    _, expr = ExpressionTreeBuilder(expression, {}).parse_expression(
+        AlgebraicExpression(), 0, 0
+    )
     assert expr.evaluate() == float(expected_result)
 
 
@@ -90,6 +96,7 @@ def test_expression_tree_builder_for_floats(expression, expected_result):
         ("sin(3.14)", sin(3.14)),
         ("cos(3.14)", cos(3.14)),
         ("tan(3.14)", tan(3.14)),
+        ("cot(3.14)", 1 / tan(3.14)),
         ("exp(3.14)", exp(3.14)),
         ("log(3.14)", log(3.14)),
         ("sin(3.14+1)", sin(3.14 + 1)),
@@ -103,7 +110,9 @@ def test_expression_tree_builder_for_floats(expression, expected_result):
     ],
 )
 def test_expression_tree_builder_with_functions(expression, expected_result):
-    _, expr = expression_tree_builder(expression, {}, AlgebraicExpression(), 0)
+    _, expr = ExpressionTreeBuilder(expression, {}).parse_expression(
+        AlgebraicExpression(), 0, 0
+    )
     assert expr.evaluate() == float(expected_result)
 
 
@@ -115,8 +124,14 @@ def test_expression_tree_builder_with_functions(expression, expected_result):
         ("sin(x^2)", {"x": 3.14}, sin(3.14 ** 2)),
         ("sin(x)^2+cos(x)^2", {"x": 3.14}, sin(3.14) ** 2 + cos(3.14) ** 2),
         ("sin(x)^2+cos(y)^2", {"x": 3.14, "y": 2.71}, sin(3.14) ** 2 + cos(2.71) ** 2),
+        ("sin(x+1)*x^2", {"x": 4, "y": 2.71}, sin(4 + 1) * 4 ** 2),
+        ("x*(x+1)", {"x": 4}, 4 * (4 + 1)),
+        ("x*(x+1)", {"x": 5}, 5 * (5 + 1)),
+        ("x*(x+1)", {"x": 6}, 6 * (6 + 1)),
     ],
 )
 def test_expression_tree_builder_with_variables(expression, variables, expected_result):
-    _, expr = expression_tree_builder(expression, variables, AlgebraicExpression(), 0)
+    _, expr = ExpressionTreeBuilder(expression, variables).parse_expression(
+        AlgebraicExpression(), 0, 0
+    )
     assert expr.evaluate() == float(expected_result)
