@@ -44,13 +44,13 @@ from app.expression import AlgebraicExpression, Constant, Operation
     ],
 )
 def test_algebraic_expression(expression, result):
-    assert expression.evaluate() == result
+    assert expression.evaluate(at={}) == result
 
 
 @pytest.mark.parametrize("value", [0, 1, 3.1415, -4, -0.5, 12321432, -2131413411])
 def test_constant(value):
     c = Constant(value)
-    assert c.evaluate() == value
+    assert c.evaluate(at={}) == value
 
 
 @pytest.mark.parametrize(

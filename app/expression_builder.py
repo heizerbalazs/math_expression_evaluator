@@ -1,5 +1,7 @@
+import copy
+
 from string import ascii_lowercase, digits
-from typing import Dict
+from typing import Dict, Tuple
 
 from app.expression import (
     AlgebraicExpression,
@@ -10,30 +12,25 @@ from app.expression import (
 )
 
 
-class ExpressionTreeBuilder:
-    def __init__(self, expression, variables):
-        self.expression = expression
-        self.expression_end = len(expression)
-        self.variables = variables
-
+class StringProcessor:
     @staticmethod
-    def is_letter(c):
+    def is_letter(c: str) -> bool:
         return c in ascii_lowercase
 
     @staticmethod
-    def is_digit(c):
+    def is_digit(c: str) -> bool:
         return c in digits
 
     @staticmethod
-    def is_operaton(c):
+    def is_operation(c: str) -> bool:
         return c in Operation.operations.keys()
 
     @staticmethod
-    def is_variable(c, variables):
+    def is_variable(c: str, variables: Dict[str, float]) -> bool:
         return c in variables.keys()
 
     @staticmethod
-    def find_last_letter(expression, start):
+    def find_last_letter(expression: str, start: int) -> Tuple[int, int]:
         i = start + 1
         end = len(expression)
         while i < end:
@@ -44,12 +41,12 @@ class ExpressionTreeBuilder:
         return start, end
 
     @staticmethod
-    def find_last_digit(expression, start):
+    def find_last_digit(expression: str, start: int) -> Tuple[int, int]:
         decimal_points = 0
         i = start + 1
         end = len(expression)
         while i < end:
-            if ExpressionTreeBuilder.is_digit(expression[i]):
+            if StringProcessor.is_digit(expression[i]):
                 i += 1
             elif expression[i] == ".":
                 if decimal_points >= 1:
@@ -71,7 +68,7 @@ class ExpressionTreeBuilder:
         return start, end
 
     @staticmethod
-    def find_closing_parenthesis(expression, start):
+    def find_closing_parenthesis(expression: str, start: int) -> Tuple[int, int]:
         lvl = 1
         i = start + 1
         end = len(expression)
@@ -86,98 +83,94 @@ class ExpressionTreeBuilder:
             i += 1
         raise Exception(f"Opening parenthesis at {start} has no closing pair.")
 
+
+class ExpressionTreeBuilder:
+    def __init__(self, expression: str, variables: Dict[str, float]):
+        self.expression = expression
+        self.expression_end = len(expression)
+        self.variables = variables
+
+    def build_expression(self):
+        return self.parse_expression(AlgebraicExpression(), 0, -1)
+
     def parse_expression(
-        self,
-        expression_tree: AlgebraicExpression,
-        index: int,
-        end: int,
-    ):
-        expression = self.expression
-        variables = self.variables
-        if end == 0:
+        self, tree: AlgebraicExpression, index: int = 0, end: int = -1
+    ) -> Tuple[int, AlgebraicExpression]:
+        if end == -1:
             end = self.expression_end
 
         if index < end:
-            c = expression[index]
+            c = self.expression[index]
             # handling parentheses
             if c == "(":
-                _start, _end = ExpressionTreeBuilder.find_closing_parenthesis(
-                    expression, index
+                _start, _end = StringProcessor.find_closing_parenthesis(
+                    self.expression, index
                 )
-                _, sub_expression = self.parse_expression(
+                _, sub_tree = self.parse_expression(
                     AlgebraicExpression(), _start + 1, _end
                 )
                 index = _end - 1
-                if expression_tree.lhs is None:
-                    expression_tree.lhs = sub_expression
+                if tree.lhs is None:
+                    tree.lhs = sub_tree
                 else:
-                    expression_tree.rhs = sub_expression
+                    tree.rhs = sub_tree
             elif c == ")":
-                if expression_tree.rhs is None:
-                    expression_tree.rhs = Constant(0)
+                if tree.rhs is None:
+                    tree.rhs = Constant(0)
             # handling letters
-            elif ExpressionTreeBuilder.is_letter(c):
-                if ExpressionTreeBuilder.is_variable(c, variables):
-                    variable = Variable(c, variables)
-                    if expression_tree.lhs is None:
-                        expression_tree.lhs = variable
+            elif StringProcessor.is_letter(c):
+                if StringProcessor.is_variable(c, self.variables):
+                    variable = Variable(c)
+                    if tree.lhs is None:
+                        tree.lhs = variable
                     else:
-                        expression_tree.rhs = variable
+                        tree.rhs = variable
                 else:
-                    _start, _end = ExpressionTreeBuilder.find_last_letter(
-                        expression, index
+                    _start, _end = StringProcessor.find_last_letter(
+                        self.expression, index
                     )
-                    sub_expression = AlgebraicExpression()
-                    sub_expression.function = FunctionOperation(expression[_start:_end])
+                    sub_tree = AlgebraicExpression()
+                    sub_tree.function = FunctionOperation(self.expression[_start:_end])
                     index = _end
-                    _start, _end = ExpressionTreeBuilder.find_closing_parenthesis(
-                        expression, index
+                    _start, _end = StringProcessor.find_closing_parenthesis(
+                        self.expression, index
                     )
-                    _, sub_expression = self.parse_expression(
-                        sub_expression, _start + 1, _end
-                    )
+                    _, sub_tree = self.parse_expression(sub_tree, _start + 1, _end)
                     index = _end - 1
-                    if expression_tree.lhs is None:
-                        expression_tree.lhs = sub_expression
+                    if tree.lhs is None:
+                        tree.lhs = sub_tree
                     else:
-                        expression_tree.rhs = sub_expression
+                        tree.rhs = sub_tree
             # handling digits
-            elif ExpressionTreeBuilder.is_digit(c):
-                _start, _end = ExpressionTreeBuilder.find_last_digit(expression, index)
-                value = float(expression[_start:_end])
+            elif StringProcessor.is_digit(c):
+                _start, _end = StringProcessor.find_last_digit(self.expression, index)
+                value = float(self.expression[_start:_end])
                 index = _end - 1
-                if expression_tree.lhs is None:
-                    expression_tree.lhs = Constant(value)
+                if tree.lhs is None:
+                    tree.lhs = Constant(value)
                 else:
-                    expression_tree.rhs = Constant(value)
+                    tree.rhs = Constant(value)
             # handling operations
-            elif ExpressionTreeBuilder.is_operaton(c):
+            elif StringProcessor.is_operation(c):
                 new_operation = Operation(c)
-                if expression_tree.lhs is None:
-                    expression_tree.lhs = Constant(0)
-                    expression_tree.operation = new_operation
-                elif expression_tree.rhs is None:
-                    expression_tree.operation = new_operation
+                if tree.lhs is None:
+                    tree.lhs = Constant(0)
+                    tree.operation = new_operation
+                elif tree.rhs is None:
+                    tree.operation = new_operation
                 elif (
-                    expression_tree.operation < new_operation
+                    tree.operation < new_operation
                 ) | new_operation.has_top_priority():
-                    sub_expression = AlgebraicExpression()
-                    sub_expression.lhs = expression_tree.rhs
-                    index, expression_tree.rhs = self.parse_expression(
-                        sub_expression, index, end
-                    )
+                    sub_tree = AlgebraicExpression()
+                    sub_tree.lhs = tree.rhs
+                    index, tree.rhs = self.parse_expression(sub_tree, index, end)
                 else:
-                    expression_tree.lhs = AlgebraicExpression(
-                        expression_tree.lhs,
-                        expression_tree.rhs,
-                        expression_tree.operation,
-                        expression_tree.function,
-                    )
-                    expression_tree.rhs = None
-                    expression_tree.operation = new_operation
+                    tree.lhs = copy.copy(tree)
+                    tree.rhs = None
+                    tree.operation = new_operation
 
-            return self.parse_expression(expression_tree, index + 1, end)
+            return self.parse_expression(tree, index + 1, end)
         else:
-            if expression_tree.rhs is None:
-                expression_tree.rhs = Constant(0)
-            return index, expression_tree
+            if tree.rhs is None:
+                tree.rhs = Constant(0)
+            return index, tree

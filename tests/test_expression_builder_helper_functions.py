@@ -1,6 +1,6 @@
 import pytest
 
-from app.expression_builder import ExpressionTreeBuilder
+from app.expression_builder import ExpressionTreeBuilder, StringProcessor
 
 
 def test_find_last_letter():
@@ -18,7 +18,7 @@ def test_find_last_letter():
     ],
 )
 def test_find_last_digit(expression, expected):
-    start, end = ExpressionTreeBuilder.find_last_digit(expression, 0)
+    start, end = StringProcessor.find_last_digit(expression, 0)
     assert float(expression[start:end]) == expected
 
 
@@ -32,7 +32,7 @@ def test_find_last_digit(expression, expected):
 )
 def test_find_last_digit_exception(expression, expected):
     with pytest.raises(Exception):
-        start, end = find_last_digit(expression, 0)
+        start, end = StringProcessor.find_last_digit(expression, 0)
         assert float(expression[start:end]) == expected
 
 

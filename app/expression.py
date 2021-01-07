@@ -1,6 +1,7 @@
 from operator import add, sub, mul, truediv, mod, pow
 from math import sin, cos, tan, log, exp
 from abc import ABC, abstractmethod
+from typing import Dict
 
 
 class Operation:
@@ -13,7 +14,7 @@ class Operation:
         "^": [2, pow],
     }
 
-    def __init__(self, symbol="+"):
+    def __init__(self, symbol: str = "+"):
         if symbol not in Operation.operations.keys():
             raise Exception(f"{symbol} is not a valid operator.")
 
@@ -52,7 +53,7 @@ class FunctionOperation:
         "exp": exp,
     }
 
-    def __init__(self, name=""):
+    def __init__(self, name: str = ""):
         if name not in FunctionOperation.functions.keys():
             raise Exception(f"{name} is not a valid mathematical function.")
 
@@ -61,26 +62,26 @@ class FunctionOperation:
 
 class Expression(ABC):
     @abstractmethod
-    def evaluate(self):
+    def evaluate(self, at: Dict[str, float]) -> float:
         pass
 
 
 class AlgebraicExpression(Expression):
     def __init__(
         self,
-        lhs=None,
-        rhs=None,
-        operation=Operation(),
-        function=FunctionOperation(),
+        lhs: Expression = None,
+        rhs: Expression = None,
+        operation: Operation = Operation(),
+        function: FunctionOperation = FunctionOperation(),
     ):
         self.lhs = lhs
         self.rhs = rhs
         self.operation = operation
         self.function = function
 
-    def evaluate(self):
-        lhs = self.lhs.evaluate()
-        rhs = self.rhs.evaluate()
+    def evaluate(self, at: Dict[str, float]) -> float:
+        lhs = self.lhs.evaluate(at)
+        rhs = self.rhs.evaluate(at)
         arg = self.operation.operator(lhs, rhs)
         value = self.function.function(arg)
         return value
@@ -90,13 +91,17 @@ class Constant(Expression):
     def __init__(self, value):
         self.value = value
 
-    def evaluate(self):
+    def evaluate(self, at: Dict[str, float]) -> float:
         return self.value
 
 
 class Variable(Expression):
-    def __init__(self, symbol, variables):
-        self.value = variables[symbol]
+    def __init__(self, symbol: str):
+        self.symbol = symbol
 
-    def evaluate(self):
-        return self.value
+    def evaluate(self, at: Dict[str, float]) -> float:
+        # TODO: refactor evaluate
+        return at[self.symbol]
+
+
+# TODO: replace None with placeholder expression

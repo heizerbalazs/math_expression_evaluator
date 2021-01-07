@@ -3,7 +3,6 @@ import pytest
 from math import sin, cos, tan, log, exp
 
 from app.expression_builder import ExpressionTreeBuilder
-from app.expression import AlgebraicExpression
 
 
 @pytest.mark.parametrize(
@@ -35,10 +34,8 @@ from app.expression import AlgebraicExpression
     ],
 )
 def test_expression_tree_builder_for_integers(expression, expected_result):
-    _, expr = ExpressionTreeBuilder(expression, {}).parse_expression(
-        AlgebraicExpression(), 0, 0
-    )
-    assert expr.evaluate() == float(expected_result)
+    _, expr = ExpressionTreeBuilder(expression, {}).build_expression()
+    assert expr.evaluate(at={}) == float(expected_result)
 
 
 @pytest.mark.parametrize(
@@ -61,10 +58,8 @@ def test_expression_tree_builder_for_integers(expression, expected_result):
     ],
 )
 def test_expression_tree_builder_with_parenthases(expression, expected_result):
-    _, expr = ExpressionTreeBuilder(expression, {}).parse_expression(
-        AlgebraicExpression(), 0, 0
-    )
-    assert expr.evaluate() == float(expected_result)
+    _, expr = ExpressionTreeBuilder(expression, {}).build_expression()
+    assert expr.evaluate(at={}) == float(expected_result)
 
 
 @pytest.mark.parametrize(
@@ -84,10 +79,8 @@ def test_expression_tree_builder_with_parenthases(expression, expected_result):
     ],
 )
 def test_expression_tree_builder_for_floats(expression, expected_result):
-    _, expr = ExpressionTreeBuilder(expression, {}).parse_expression(
-        AlgebraicExpression(), 0, 0
-    )
-    assert expr.evaluate() == float(expected_result)
+    _, expr = ExpressionTreeBuilder(expression, {}).build_expression()
+    assert expr.evaluate(at={}) == float(expected_result)
 
 
 @pytest.mark.parametrize(
@@ -110,10 +103,8 @@ def test_expression_tree_builder_for_floats(expression, expected_result):
     ],
 )
 def test_expression_tree_builder_with_functions(expression, expected_result):
-    _, expr = ExpressionTreeBuilder(expression, {}).parse_expression(
-        AlgebraicExpression(), 0, 0
-    )
-    assert expr.evaluate() == float(expected_result)
+    _, expr = ExpressionTreeBuilder(expression, {}).build_expression()
+    assert expr.evaluate(at={}) == float(expected_result)
 
 
 @pytest.mark.parametrize(
@@ -131,7 +122,5 @@ def test_expression_tree_builder_with_functions(expression, expected_result):
     ],
 )
 def test_expression_tree_builder_with_variables(expression, variables, expected_result):
-    _, expr = ExpressionTreeBuilder(expression, variables).parse_expression(
-        AlgebraicExpression(), 0, 0
-    )
-    assert expr.evaluate() == float(expected_result)
+    _, expr = ExpressionTreeBuilder(expression, variables).build_expression()
+    assert expr.evaluate(at=variables) == float(expected_result)
