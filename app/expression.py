@@ -69,11 +69,13 @@ class Expression(ABC):
 class AlgebraicExpression(Expression):
     def __init__(
         self,
+        parent: Expression = None,
         lhs: Expression = None,
         rhs: Expression = None,
         operation: Operation = Operation(),
         function: FunctionOperation = FunctionOperation(),
     ):
+        self.parent = parent
         self.lhs = lhs
         self.rhs = rhs
         self.operation = operation

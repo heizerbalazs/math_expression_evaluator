@@ -10,20 +10,21 @@ from app.expression import AlgebraicExpression, Constant, Operation
 @pytest.mark.parametrize(
     "expression, result",
     [
-        (AlgebraicExpression(Constant(3), Constant(2), Operation("+")), 5),
-        (AlgebraicExpression(Constant(3), Constant(2), Operation("-")), 1),
-        (AlgebraicExpression(Constant(3), Constant(2), Operation("*")), 6),
+        (AlgebraicExpression(None, Constant(3), Constant(2), Operation("+")), 5),
+        (AlgebraicExpression(None, Constant(3), Constant(2), Operation("-")), 1),
+        (AlgebraicExpression(None, Constant(3), Constant(2), Operation("*")), 6),
         (
-            AlgebraicExpression(Constant(3), Constant(2), Operation("/")),
+            AlgebraicExpression(None, Constant(3), Constant(2), Operation("/")),
             1.5,
         ),
-        (AlgebraicExpression(Constant(3), Constant(2), Operation("%")), 1),
-        (AlgebraicExpression(Constant(3), Constant(2), Operation("^")), 9),
+        (AlgebraicExpression(None, Constant(3), Constant(2), Operation("%")), 1),
+        (AlgebraicExpression(None, Constant(3), Constant(2), Operation("^")), 9),
         # (2+3)*(4+5) == 45
         (
             AlgebraicExpression(
-                AlgebraicExpression(Constant(2), Constant(3), Operation("+")),
-                AlgebraicExpression(Constant(4), Constant(5), Operation("+")),
+                None,
+                AlgebraicExpression(None, Constant(2), Constant(3), Operation("+")),
+                AlgebraicExpression(None, Constant(4), Constant(5), Operation("+")),
                 Operation("*"),
             ),
             45,
@@ -31,9 +32,11 @@ from app.expression import AlgebraicExpression, Constant, Operation
         # 2+(3*4)+5 == 19
         (
             AlgebraicExpression(
+                None,
                 Constant(2),
                 AlgebraicExpression(
-                    AlgebraicExpression(Constant(3), Constant(4), Operation("*")),
+                    None,
+                    AlgebraicExpression(None, Constant(3), Constant(4), Operation("*")),
                     Constant(5),
                     Operation("+"),
                 ),

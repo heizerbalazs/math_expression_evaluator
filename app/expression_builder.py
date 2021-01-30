@@ -99,7 +99,7 @@ class ExpressionTreeBuilder:
         if end == -1:
             end = self.expression_end
 
-        if index < end:
+        while index < end:
             c = self.expression[index]
             # handling parentheses
             if c == "(":
@@ -162,15 +162,26 @@ class ExpressionTreeBuilder:
                     tree.operation < new_operation
                 ) | new_operation.has_top_priority():
                     sub_tree = AlgebraicExpression()
+                    sub_tree.parent = tree
                     sub_tree.lhs = tree.rhs
-                    index, tree.rhs = self.parse_expression(sub_tree, index, end)
+                    sub_tree.operation = new_operation
+                    tree = sub_tree
                 else:
+                    if tree.parent is not None:
+                        while tree.parent.operation > new_operation:
+                            tree.parent.rhs = tree
+                            tree = tree.parent
+                            if tree.parent is None:
+                                break
                     tree.lhs = copy.copy(tree)
+                    tree.lhs.parent = tree
                     tree.rhs = None
                     tree.operation = new_operation
+            index += 1
 
-            return self.parse_expression(tree, index + 1, end)
-        else:
-            if tree.rhs is None:
-                tree.rhs = Constant(0)
-            return index, tree
+        if tree.rhs is None:
+            tree.rhs = Constant(0)
+        while tree.parent is not None:
+            tree.parent.rhs = tree
+            tree = tree.parent
+        return index, tree
