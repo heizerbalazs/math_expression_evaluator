@@ -1,7 +1,8 @@
 import pytest
 
 from operator import add, sub, mul, truediv, mod, pow, gt, eq, lt
-from math import sin, cos, tan, log, exp
+
+# from math import sin, cos, tan, log, exp
 from itertools import product
 
 from app.expression import AlgebraicExpression, Constant, Operation

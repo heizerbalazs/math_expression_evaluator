@@ -1,6 +1,6 @@
 #! /Users/balazsheizer/DEV/homework/.env/bin/python
 import argparse
-from typing import Dict, List
+from typing import List
 
 from app.expression_builder import ExpressionTreeBuilder
 
