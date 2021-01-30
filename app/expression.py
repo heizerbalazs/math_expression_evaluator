@@ -102,8 +102,4 @@ class Variable(Expression):
         self.symbol = symbol
 
     def evaluate(self, at: Dict[str, float]) -> float:
-        # TODO: refactor evaluate
         return at[self.symbol]
-
-
-# TODO: replace None with placeholder expression
