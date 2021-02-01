@@ -2,7 +2,7 @@
 
 Write a script that excepts two inputs:
 - an arbitrary mathematical expression as a string
-- value(s) to evaluate the xpression at
+- value(s) to evaluate the expression at
 
 and outputs the result or an error if the expression is invalid.
 
