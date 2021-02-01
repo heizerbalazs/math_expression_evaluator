@@ -44,7 +44,6 @@ class Operation:
 
 class FunctionOperation:
     functions = {
-        "": lambda x: x,
         "sin": sin,
         "cos": cos,
         "tan": tan,
@@ -72,8 +71,8 @@ class AlgebraicExpression(Expression):
         parent: Expression = None,
         lhs: Expression = None,
         rhs: Expression = None,
-        operation: Operation = Operation(),
-        function: FunctionOperation = FunctionOperation(),
+        operation: Operation = None,
+        function: FunctionOperation = None,
     ):
         self.parent = parent
         self.lhs = lhs
@@ -83,9 +82,9 @@ class AlgebraicExpression(Expression):
 
     def evaluate(self, at: Dict[str, float]) -> float:
         lhs = self.lhs.evaluate(at)
-        rhs = self.rhs.evaluate(at)
-        arg = self.operation.operator(lhs, rhs)
-        value = self.function.function(arg)
+        rhs = self.rhs.evaluate(at) if self.rhs is not None else None
+        arg = lhs if self.operation is None else self.operation.operator(lhs, rhs)
+        value = arg if self.function is None else self.function.function(arg)
         return value
 
 

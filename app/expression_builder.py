@@ -26,6 +26,10 @@ class StringProcessor:
         return c in Operation.operations.keys()
 
     @staticmethod
+    def is_parenthesis(c: str) -> bool:
+        return c in ["(", ")"]
+
+    @staticmethod
     def is_variable(c: str, variables: Dict[str, float]) -> bool:
         return c in variables.keys()
 
@@ -69,6 +73,8 @@ class StringProcessor:
 
     @staticmethod
     def find_closing_parenthesis(expression: str, start: int) -> Tuple[int, int]:
+        if expression[start] == ")":
+            raise Exception(f"Closing parenthesis at {start} has no opening pair.")
         lvl = 1
         i = start + 1
         end = len(expression)
@@ -79,7 +85,7 @@ class StringProcessor:
                 lvl -= 1
 
             if lvl == 0:
-                return start, i + 1
+                return start, i
             i += 1
         raise Exception(f"Opening parenthesis at {start} has no closing pair.")
 
@@ -102,21 +108,18 @@ class ExpressionTreeBuilder:
         while index < end:
             c = self.expression[index]
             # handling parentheses
-            if c == "(":
+            if StringProcessor.is_parenthesis(c):
                 _start, _end = StringProcessor.find_closing_parenthesis(
                     self.expression, index
                 )
                 _, sub_tree = self.parse_expression(
                     AlgebraicExpression(), _start + 1, _end
                 )
-                index = _end - 1
+                index = _end
                 if tree.lhs is None:
                     tree.lhs = sub_tree
                 else:
                     tree.rhs = sub_tree
-            elif c == ")":
-                if tree.rhs is None:
-                    tree.rhs = Constant(0)
             # handling letters
             elif StringProcessor.is_letter(c):
                 if StringProcessor.is_variable(c, self.variables):
@@ -136,7 +139,7 @@ class ExpressionTreeBuilder:
                         self.expression, index
                     )
                     _, sub_tree = self.parse_expression(sub_tree, _start + 1, _end)
-                    index = _end - 1
+                    index = _end
                     if tree.lhs is None:
                         tree.lhs = sub_tree
                     else:
@@ -154,8 +157,13 @@ class ExpressionTreeBuilder:
             elif StringProcessor.is_operation(c):
                 new_operation = Operation(c)
                 if tree.lhs is None:
-                    tree.lhs = Constant(0)
-                    tree.operation = new_operation
+                    if c == "-":
+                        tree.lhs = Constant(0)
+                        tree.operation = new_operation
+                    else:
+                        raise Exception(
+                            f"Error at {index}. The only operator allowed as starting character is -."
+                        )
                 elif tree.rhs is None:
                     tree.operation = new_operation
                 elif (
@@ -168,7 +176,7 @@ class ExpressionTreeBuilder:
                     tree = sub_tree
                 else:
                     if tree.parent is not None:
-                        while tree.parent.operation > new_operation:
+                        while tree.parent.operation >= new_operation:
                             tree.parent.rhs = tree
                             tree = tree.parent
                             if tree.parent is None:
@@ -179,8 +187,8 @@ class ExpressionTreeBuilder:
                     tree.operation = new_operation
             index += 1
 
-        if tree.rhs is None:
-            tree.rhs = Constant(0)
+        if (tree.rhs is None) & (tree.operation is not None):
+            raise Exception(f"The expression is in complete at {index}.")
         while tree.parent is not None:
             tree.parent.rhs = tree
             tree = tree.parent

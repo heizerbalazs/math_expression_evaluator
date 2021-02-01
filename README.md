@@ -1,19 +1,27 @@
-# Tasks
+# Math Expression Evaluator
 
-- evaluate.py
-- expression.py -- Expression representation: AlgebraicExpression, Constant, Operation
-- expression_builder.py -- string -> expression tree: using regular expression statemachines and recursion
+A script thatexcepts two inputs:
+- an arbitrary mathematical expression as a string
+- value(s) to evaluate the xpression at
 
-## Expression representation
+and outputs the result or an error if the expression is invalid.
 
-AlgebraicExpression(lhs, rhs, operation, function)
+```
+$ python evaluate.py --expression 'x*(x+1)' --at 4,5,6
+>>
+20.0, 30.0, 42.0
 
-Example: sin(3*x) -> AlgebraicExpression(Constant(3), Variable(x), Operation("*"), Function("sin"))
+$ python evaluate.py --expression 'sin(x+1)x^2' --at 4
+>>
+-15.3278839446
 
-## Expression building
+```
 
-1. expression_builder for integers without () and functions (done)
-2. expression_builder for integers with () but without functions (done)
-3. expression_builder for integers with () and functions (done)
-4. expression_builder for floats with () and functions (done)
-5. add variables (done)
+# Requirements
+
+- accept the following operators and functions:
+    - +, -, *, /, ^ (power), % (mod)
+    - sin, cos, tan, cot, exp, log
+
+- handle arbitrary nested parentheses (round brackets)
+- using ```eval``` or other available packages is not allowed, your code has to process the string and evaluate it directly.
