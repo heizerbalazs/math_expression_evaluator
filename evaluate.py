@@ -18,7 +18,7 @@ def parse_args():
     )
     parser.add_argument(
         "--at",
-        type=lambda s: [int(item) for item in s.split(",")],
+        type=lambda s: [float(item) for item in s.split(",")],
         help="point\\points where you want to know the value of the expression",
     )
     return parser.parse_args()

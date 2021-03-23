@@ -144,6 +144,8 @@ def test_expression_tree_builder_with_functions(expression, expected_result):
         ("x*(x+1)", {"x": 4}, 4 * (4 + 1)),
         ("x*(x+1)", {"x": 5}, 5 * (5 + 1)),
         ("x*(x+1)", {"x": 6}, 6 * (6 + 1)),
+        ("x^(-1/4)", {"x": 16}, 16 ** (-1 / 4)),
+        ("x^(-1/4)", {"x": 0.5}, 0.5 ** (-1 / 4)),
         ("x*(x+1)+(1.2-0.3)", {"x": 6}, 6 * (6 + 1) + (1.2 - 0.3)),
     ],
 )
@@ -169,6 +171,8 @@ def test_expression_tree_builder_with_variables(expression, variables, expected_
         (")x(", {"x": 6}),
         ("-3x", {"x": 6}),
         ("x/0", {"x": 6}),
+        ("y", {"x": 6}),
+        ("z", {"x": 6}),
     ],
 )
 def test_expression_tree_builder_for_incorrect_expression(expression, variables):

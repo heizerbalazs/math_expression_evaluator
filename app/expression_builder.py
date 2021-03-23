@@ -19,7 +19,7 @@ class StringProcessor:
 
     @staticmethod
     def is_digit(c: str) -> bool:
-        return c in digits
+        return (c in digits) | (c == ".")
 
     @staticmethod
     def is_operation(c: str) -> bool:
@@ -75,6 +75,8 @@ class StringProcessor:
     def find_closing_parenthesis(expression: str, start: int) -> Tuple[int, int]:
         if expression[start] == ")":
             raise Exception(f"Closing parenthesis at {start} has no opening pair.")
+        if expression[start + 1] == ")":
+            raise Exception(f"Empty expression at {start}.")
         lvl = 1
         i = start + 1
         end = len(expression)
@@ -119,7 +121,7 @@ class ExpressionTreeBuilder:
                 if tree.lhs is None:
                     tree.lhs = sub_tree
                 elif (tree.operation is None) | (tree.rhs is not None):
-                    raise Exception(f"Missing operator at {index}")
+                    raise Exception(f"Missing operator at {index}.")
                 else:
                     tree.rhs = sub_tree
             # handling letters
@@ -129,7 +131,7 @@ class ExpressionTreeBuilder:
                     if tree.lhs is None:
                         tree.lhs = variable
                     elif (tree.operation is None) | (tree.rhs is not None):
-                        raise Exception(f"Missing operator at {index}")
+                        raise Exception(f"Missing operator at {index}.")
                     else:
                         tree.rhs = variable
                 else:
@@ -147,7 +149,7 @@ class ExpressionTreeBuilder:
                     if tree.lhs is None:
                         tree.lhs = sub_tree
                     elif (tree.operation is None) | (tree.rhs is not None):
-                        raise Exception(f"Missing operator at {index}")
+                        raise Exception(f"Missing operator at {index}.")
                     else:
                         tree.rhs = sub_tree
             # handling digits
@@ -158,7 +160,7 @@ class ExpressionTreeBuilder:
                 if tree.lhs is None:
                     tree.lhs = Constant(value)
                 elif (tree.operation is None) | (tree.rhs is not None):
-                    raise Exception(f"Missing operator at {index}")
+                    raise Exception(f"Missing operator at {index}.")
                 else:
                     tree.rhs = Constant(value)
             # handling operations
@@ -173,7 +175,14 @@ class ExpressionTreeBuilder:
                             f"Error at {index}. The only operator allowed as starting character is -."
                         )
                 elif tree.rhs is None:
-                    tree.operation = new_operation
+                    if (c == "-") & (tree.operation is not None):
+                        sub_tree = AlgebraicExpression()
+                        sub_tree.parent = tree
+                        sub_tree.lhs = Constant(0)
+                        sub_tree.operation = new_operation
+                        tree = sub_tree
+                    else:
+                        tree.operation = new_operation
                 elif (
                     tree.operation < new_operation
                 ) | new_operation.has_top_priority():
@@ -196,7 +205,7 @@ class ExpressionTreeBuilder:
             index += 1
 
         if (tree.rhs is None) & (tree.operation is not None):
-            raise Exception(f"The expression is in complete at {index}.")
+            raise Exception(f"The expression is incomplete at {index}.")
         while tree.parent is not None:
             tree.parent.rhs = tree
             tree = tree.parent
