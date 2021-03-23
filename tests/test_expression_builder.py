@@ -81,6 +81,9 @@ def test_expression_tree_builder_with_parenthases(expression, expected_result):
         ),
         ("3.14^2+6.25^3", 3.14 ** 2 + 6.25 ** 3),
         ("(3.14-10)^2+6.25^3", (3.14 - 10) ** 2 + 6.25 ** 3),
+        ("-(-3)", -(-3)),
+        ("--3", -(-3)),
+        (".3+1", 0.3 + 1),
     ],
 )
 def test_expression_tree_builder_for_floats(expression, expected_result):
@@ -141,8 +144,34 @@ def test_expression_tree_builder_with_functions(expression, expected_result):
         ("x*(x+1)", {"x": 4}, 4 * (4 + 1)),
         ("x*(x+1)", {"x": 5}, 5 * (5 + 1)),
         ("x*(x+1)", {"x": 6}, 6 * (6 + 1)),
+        ("x*(x+1)+(1.2-0.3)", {"x": 6}, 6 * (6 + 1) + (1.2 - 0.3)),
     ],
 )
 def test_expression_tree_builder_with_variables(expression, variables, expected_result):
     _, expr = ExpressionTreeBuilder(expression, variables).build_expression()
     assert expr.evaluate(at=variables) == float(expected_result)
+
+
+@pytest.mark.parametrize(
+    "expression, variables",
+    [
+        ("xx", {"x": 6}),
+        ("0.000.12", {}),
+        ("+-3", {}),
+        ("+", {}),
+        ("()", {}),
+        ("(0))", {}),
+        ("((0)", {}),
+        ("()0", {}),
+        ("()1", {}),
+        ("sinx", {"x": 6}),
+        ("log(2+sinx)", {"x": 6}),
+        (")x(", {"x": 6}),
+        ("-3x", {"x": 6}),
+        ("x/0", {"x": 6}),
+    ],
+)
+def test_expression_tree_builder_for_incorrect_expression(expression, variables):
+    with pytest.raises(Exception):
+        _, expr = ExpressionTreeBuilder(expression, variables).build_expression()
+        expr.evaluate(at=variables)

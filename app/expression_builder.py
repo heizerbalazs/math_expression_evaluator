@@ -118,6 +118,8 @@ class ExpressionTreeBuilder:
                 index = _end
                 if tree.lhs is None:
                     tree.lhs = sub_tree
+                elif (tree.operation is None) | (tree.rhs is not None):
+                    raise Exception(f"Missing operator at {index}")
                 else:
                     tree.rhs = sub_tree
             # handling letters
@@ -126,6 +128,8 @@ class ExpressionTreeBuilder:
                     variable = Variable(c)
                     if tree.lhs is None:
                         tree.lhs = variable
+                    elif (tree.operation is None) | (tree.rhs is not None):
+                        raise Exception(f"Missing operator at {index}")
                     else:
                         tree.rhs = variable
                 else:
@@ -142,6 +146,8 @@ class ExpressionTreeBuilder:
                     index = _end
                     if tree.lhs is None:
                         tree.lhs = sub_tree
+                    elif (tree.operation is None) | (tree.rhs is not None):
+                        raise Exception(f"Missing operator at {index}")
                     else:
                         tree.rhs = sub_tree
             # handling digits
@@ -151,6 +157,8 @@ class ExpressionTreeBuilder:
                 index = _end - 1
                 if tree.lhs is None:
                     tree.lhs = Constant(value)
+                elif (tree.operation is None) | (tree.rhs is not None):
+                    raise Exception(f"Missing operator at {index}")
                 else:
                     tree.rhs = Constant(value)
             # handling operations
