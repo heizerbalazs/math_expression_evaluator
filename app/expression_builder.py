@@ -175,14 +175,7 @@ class ExpressionTreeBuilder:
                             f"Error at {index}. The only operator allowed as starting character is -."
                         )
                 elif tree.rhs is None:
-                    if (c == "-") & (tree.operation is not None):
-                        sub_tree = AlgebraicExpression()
-                        sub_tree.parent = tree
-                        sub_tree.lhs = Constant(0)
-                        sub_tree.operation = new_operation
-                        tree = sub_tree
-                    else:
-                        tree.operation = new_operation
+                    tree.operation = new_operation
                 elif (
                     tree.operation < new_operation
                 ) | new_operation.has_top_priority():
